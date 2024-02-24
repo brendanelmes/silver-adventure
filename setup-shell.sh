@@ -11,7 +11,7 @@ echo "Login successful."
 
 echo "Creating service principal..."
 
-service_principal=$(az ad sp create-for-rbac)
+service_principal=$(az ad sp create-for-rbac --role Contributor --scopes /subscriptions/$subscription_id)
 
 echo "Successfully created service principal: $(echo "$service_principal" | jq -r '.displayName')"
 
