@@ -1,0 +1,5 @@
+brew 'azure-cli'
+brew 'terraform'
+brew 'python'
+brew 'go'
+brew 'jq'
