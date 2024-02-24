@@ -24,3 +24,8 @@ Install the packages:
 pip install -Ur requirements.txt
 ```
 
+Start the server:
+
+```bash
+gunicorn -b :3000 wsgi
+```
