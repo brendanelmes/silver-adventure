@@ -1,73 +1,78 @@
 # silver-adventure
 
-Introductory ramblings.
+# 1. Deployable Production Environment
 
-## Local setup
-To build and deploy manually, you will need the following tools installed:
+## Tools used
 
-1. Terraform
-1. Python
-1. Golang
-1. Docker
-1. Azure CLI
+#### Azure and Terraform
+Why? A great opportunity to work with new technologies.
 
-To install them, run the following command at the root of the repo:
+#### Docker
+Why? Because a 'podman X buildah' setup is not available on MacOS, so would not be easily repeatable by the audience.
 
-```bash
-brew bundle
-```
+#### Shell scripts...
+Why? Quick and easy way to get started grouping CLI commands.
 
-Or for a more comprehensive security and automation tooling setup, [check out this repo](https://github.com/T0mmykn1fe/DevSecOps-OSX-Mac-Setup-with-Homebrew/tree/master).
+## Local setup and automation
 
-## Connecting to Azure
+This repository consists of a collection of shell scripts designed to be run one after another on MacOS at the root of the repository.
 
-> To skip straight to a configured shell session, run the setup script with:
-> ```bash
-> source setup-shell.sh
-> ```
+Execute the scripts in order, noting the commands used to run vary between `source` and `sh`:
 
-Alternatively, you can follow the steps through manually:
+### 1. `setup-shell.sh`
 
-### Log in
-First, log into Azure by running:
+#### Steps
+- Install required tools
+- Login to Azure
+- Create a service principal
+- Configure service principal credentials in shell environment variables
+
+#### Command:
 
 ```bash
-az login
+source setup-shell.sh
 ```
 
-This will open a browser window and prompt you to log in to Azure.
+### 2. `create-container-registry.sh`
 
-### Create a service principal
+#### Steps
+- Uses Terraform to create a resource group and container registry
+- Creates a new service principal with push permission to the registry
+- Configure this service principal credentials in different shell environment variables
 
-To use terraform, first create a service principal:
-
-1. Run the following:
-    ```bash
-    az 
-    ```
-1. Verify the output looks like:
-    ```json
-    {
-        "": "",
-        "": "",
-        "": "",
-        "": ""
-    }
-    ```
-
-Once created, add the contents of the output as the following environment variables:
+#### Command:
 
 ```bash
-export ARM_SUBSCRIPTION_ID="<azure_subscription_id>"
-export ARM_TENANT_ID="<azure_subscription_tenant_id>"
-export ARM_CLIENT_ID="<service_principal_appid>"
-export ARM_CLIENT_SECRET="<service_principal_password>"
+source create-container-registry.sh
 ```
 
-Verify the existence of these variables:
+### 3. `docker-build-and-push.sh`
+
+#### Steps
+- Starts Docker desktop
+- Sleeps whilst Docker desktop starts
+- Logs into the container registry with generated credentials
+- Builds and pushes a container image to the registry
+
+#### Command:
 
 ```bash
-printenv | grep ^ARM*
+sh docker-build-and-push.sh
 ```
 
-## CI workflow
+### 4. `create-container-app.sh`
+
+#### Steps
+- Registers container app provider 
+- Grants Terraform service principal permission to pull images from the created registry
+- Logs into the container registry with pull permission credentials
+- Uses Terraform to create a container app
+
+#### Command:
+
+```bash
+sh create-container-app.sh
+```
+
+# 2. Secure Database Access
+
