@@ -1,5 +1,7 @@
 # Rates database
 
+Notes on running Postgres locally.
+
 ## Local setup
 The brew formula for Postgres `13.x` appears not to be accepting commands correctly. Postgres `14.x` is working as expected, so for local development this has been added to the brew bundle.
 
