@@ -1,4 +1,5 @@
 # silver-adventure
+As the auto-generated name suggests, it was certainly an adventure. Not completed to the (gold) standard I had hoped, but a fun task and good learning experience overall.
 
 # 1. Deployable Production Environment
 
@@ -16,6 +17,8 @@ Why? Quick and easy way to get started grouping CLI commands.
 ## Local setup and automation
 
 This repository consists of a collection of shell scripts designed to be run one after another on MacOS at the root of the repository.
+
+The process assumes only that the user is running on MacOS and has an active Azure subscription (free tier is fine).
 
 Execute the scripts in order, noting the commands used to run vary between `source` and `sh`:
 
