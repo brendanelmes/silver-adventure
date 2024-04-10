@@ -12,9 +12,23 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./rates.sql:/docker-entrypoint-initdb.d/rates.sql
+      - ./sql/rates.sql:/docker-entrypoint-initdb.d/rates.sql
     networks:
       - dem
+
+  app:
+    restart: always
+    build:
+      context: ./rates
+      dockerfile: Dockerfile
+    volumes:
+      - .:/rates
+    depends_on:
+      - postgres
+    networks:
+      - dem
+    ports:
+      - '5000:5000'
 
   pgadmin:
     image: dpage/pgadmin4:latest
