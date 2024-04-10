@@ -1,7 +1,0 @@
-brew 'azure-cli'
-brew 'terraform'
-brew 'python3'
-brew 'go'
-brew 'jq'
-brew 'postgresql@14'
-cask 'docker'
