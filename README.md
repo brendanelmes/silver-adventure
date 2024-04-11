@@ -14,7 +14,7 @@ The previous attempt which dives into terraform/terratest/azure can be found on 
 ### Getting started
 By the end of this guide, you will have a running Flask application which reads data from a Postgres13.5 database.
 
-> Note this guide assumes the reader is working on mac OS.
+> Note this guide assumes the reader is working on mac OS and [has homebrew installed](https://docs.brew.sh/Installation).
 
 #### 1. Install and launch Docker Desktop
 
@@ -45,6 +45,14 @@ You can verify that the pods are running via Docker Desktop or by running:
 docker ps
 ```
 
+The output will look something like:
+
+```
+CONTAINER ID   IMAGE                  COMMAND                  CREATED             STATUS             PORTS                    NAMES
+af77e9c0c99e   silver-adventure-app   "gunicorn -b 0.0.0.0…"   About an hour ago   Up About an hour   0.0.0.0:3000->3000/tcp   silver-adventure-app-1
+ab03aadfca34   postgres:13.5          "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:5432->5432/tcp   silver-adventure-rates_db-1
+```
+
 The API should now be available to test at http://localhost:3000
 
 Test the application by getting the average rates between ports:
@@ -72,10 +80,23 @@ The output should be something like this:
 ```
 
 #### Troubleshooting
-Start by verifying that the data has been correctly loaded into the database by adding pgadmin to the **docker-compose.yaml**
+Start by verifying that the data has been correctly loaded into the database by adding pgadmin to the **docker-compose.yaml** under **services**
 
 ```yaml
-
+services:
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@admin.com
+            PGADMIN_DEFAULT_PASSWORD: pgadmin
+            PGADMIN_LISTEN_PORT: 80
+        ports:
+            - "8080:80"
+        depends_on:
+            - rates_db
+        networks:
+            - dem
 ```
 
 ### Security considerations
