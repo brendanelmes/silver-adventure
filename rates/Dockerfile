@@ -1,4 +1,4 @@
-FROM python:3.12.3-slim as build
+FROM python:3.12.3-slim@sha256:541d45d3d675fb8197f534525a671e2f8d66c882b89491f9dda271f4f94dcd06 as build
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	build-essential libpq-dev gcc 
@@ -15,7 +15,7 @@ RUN pip install -U gunicorn
 COPY requirements.txt .
 RUN pip install -Ur requirements.txt
 
-FROM python:3.12.3-slim
+FROM python:3.12.3-slim@sha256:541d45d3d675fb8197f534525a671e2f8d66c882b89491f9dda271f4f94dcd06
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
