@@ -8,6 +8,7 @@ from werkzeug.exceptions import BadRequest
 
 def get_db_conn():
     """ Create a database connection. """
+    # DB connection details read by psycopg2 from environment variables
     return psycopg2.connect()
 
 

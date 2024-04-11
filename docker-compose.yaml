@@ -26,7 +26,7 @@ services:
     networks:
       - dem
     ports:
-      - '5000:5000'
+      - '3000:3000'
     env_file:
       - ./rates/.env_flask
-    command: gunicorn -b 0.0.0.0:5000 wsgi
+    command: gunicorn -b 0.0.0.0:3000 wsgi
