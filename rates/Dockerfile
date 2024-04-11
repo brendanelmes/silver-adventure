@@ -36,4 +36,4 @@ ENV PGPASSWORD=postgres
 
 ENV PYTHONUNBUFFERED=1 \
     PATH="/usr/app/venv/bin:$PATH"
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "wsgi"]
+CMD ["gunicorn", "--log-level", "debug", "-b", "0.0.0.0:5000", "wsgi"]
