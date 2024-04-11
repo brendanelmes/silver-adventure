@@ -21,19 +21,16 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	build-essential libpq-dev 
 
-RUN groupadd -g 999 python && \
-    useradd -r -u 999 -g python python
-
-RUN mkdir /usr/app && chown python:python /usr/app
+RUN mkdir /usr/app
 WORKDIR /usr/app
 
-COPY --chown=python:python --from=build /usr/app/venv ./venv
-COPY --chown=python:python rates.py wsgi.py config.py ./
+COPY  --from=build /usr/app/venv ./venv
+COPY rates.py wsgi.py config.py entrypoint.sh ./
 
-USER 999
-
-ENV PGPASSWORD=postgres
+RUN chmod +x entrypoint.sh
 
 ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
     PATH="/usr/app/venv/bin:$PATH"
-CMD ["gunicorn", "--log-level", "debug", "-b", "0.0.0.0:5000", "wsgi"]
+
+CMD ["/usr/app/entrypoint.sh"]

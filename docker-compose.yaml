@@ -30,7 +30,11 @@ services:
     ports:
       - '5000:5000'
     environment:
-      PGPASSWORD: postgres
+      - PGPASSWORD=postgres
+      - PGHOST=rates_db
+      - PGUSER=postgres
+      - PGDATABASE=rates
+    command: gunicorn --log-level debug -b 0.0.0.0:5000 wsgi
 
   pgadmin:
     image: dpage/pgadmin4:latest
