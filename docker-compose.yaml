@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./sql/rates.sql:/docker-entrypoint-initdb.d/rates.sql
+      - ./db/rates.sql:/docker-entrypoint-initdb.d/rates.sql
     networks:
       - dem
 
