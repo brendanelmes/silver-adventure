@@ -5,10 +5,8 @@ services:
   rates_db:
     image: postgres:13.5
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: rates
+    env_file:
+      - ./db/.env_db
     ports:
       - "5432:5432"
     volumes:
@@ -29,9 +27,6 @@ services:
       - dem
     ports:
       - '5000:5000'
-    environment:
-      - PGPASSWORD=postgres
-      - PGHOST=rates_db
-      - PGUSER=postgres
-      - PGDATABASE=rates
+    env_file:
+      - ./rates/.env_flask
     command: gunicorn -b 0.0.0.0:5000 wsgi
