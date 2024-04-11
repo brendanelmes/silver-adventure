@@ -99,6 +99,8 @@ services:
             - dem
 ```
 
+You can use the values in the **environment** section to login and query the database.
+
 ### Security considerations
 
 An example of some of the security considerations made:
@@ -150,7 +152,7 @@ Vault would provide the audit information about who is granted database credenti
 
 #### Diagram
 
-![diagram](thought-process/images/diagram.png)
+![diagram](images/diagram.png)
 
 1. User requests database credentials from Vault
 2. Vault uses database root credentials to create a temporary database user with role defined by external group
