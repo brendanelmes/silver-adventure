@@ -1,5 +1,5 @@
 DB = {
     "name": "postgres",
     "user": "postgres",
-    "host": "postgres"
+    "host": "rates_db"
 }
