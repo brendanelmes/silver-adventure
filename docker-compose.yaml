@@ -34,7 +34,7 @@ services:
       - PGHOST=rates_db
       - PGUSER=postgres
       - PGDATABASE=rates
-    command: gunicorn --log-level debug -b 0.0.0.0:5000 wsgi
+    command: gunicorn -b 0.0.0.0:5000 wsgi
 
   pgadmin:
     image: dpage/pgadmin4:latest

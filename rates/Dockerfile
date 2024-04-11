@@ -21,16 +21,16 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
 	build-essential libpq-dev 
 
-RUN mkdir /usr/app
+RUN groupadd -g 999 python && \
+    useradd -r -u 999 -g python python
+
+RUN mkdir /usr/app && chown python:python /usr/app
 WORKDIR /usr/app
 
-COPY  --from=build /usr/app/venv ./venv
-COPY rates.py wsgi.py config.py entrypoint.sh ./
+COPY --chown=python:python --from=build /usr/app/venv ./venv
+COPY --chown=python:python rates.py wsgi.py ./
 
-RUN chmod +x entrypoint.sh
+USER 999
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
     PATH="/usr/app/venv/bin:$PATH"
-
-CMD ["/usr/app/entrypoint.sh"]

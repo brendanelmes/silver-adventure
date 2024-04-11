@@ -453,3 +453,6 @@ Resolved issues:
 - config.py referring to localhost changed to host **postgres**
 - Dockerfile base image python 3.12 due to versioning issues with psycopg2
 - Added PGPASSWORD environment variable to Dockerfile (will move to compose later)
+- Using PGHOST and other PG environment variables to deal with connection issues.
+
+Application is working correctly with docker compose.
