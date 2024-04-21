@@ -5,11 +5,18 @@ from flask import Flask, request, jsonify
 from psycopg2.extras import DictCursor
 from werkzeug.exceptions import BadRequest
 
+import config
 
-def get_db_conn():
+
+def get_db_conn(db_config):
     """ Create a database connection. """
-    # DB connection details read by psycopg2 from environment variables
-    return psycopg2.connect()
+    return psycopg2.connect(
+        "dbname='{}' user='{}' host='{}'".format(
+            db_config["name"],
+            db_config["user"],
+            db_config["host"]
+        )
+    )
 
 
 def create_app():
@@ -19,7 +26,7 @@ def create_app():
     # Make JSON output pretty by default
     app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
 
-    conn = get_db_conn()
+    conn = get_db_conn(config.DB)
 
     def get_cursor():
         """Get database dict cursor."""
