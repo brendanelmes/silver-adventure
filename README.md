@@ -1,61 +1,90 @@
-# silver-adventure
-An enjoyable task which has lots of interesting considerations to explore. I will no doubt pick this up again at a later date for some continued Azure learning.
+# CFP Security Operations Task
 
-## 1. Deployable Production Environment
-The focus for this attempt was to achieve repeatable working app configuration whilst demonstrating production security considerations.
+Welcome to the challenge, please remember there is no wrong or right way to do this challenge just bear in mind the following;
 
-#### Chosen technologies
-- **Docker**: developing containers locally with Docker provides a fast iteration time and would be repeatable by most readers.
+* Build it with security in mind
+* Spend no more than 4 hours on this challenge
 
-- **Terraform x Azure**: A great opportunity to work with new technology.
+It is recommended that you use 
+* AZURE
+* Terraform
 
-The previous attempt which dives into terraform/terratest/azure can be found on a different branch [here.](https://github.com/brendanelmes/silver-adventure/tree/first-attempt-terraform-az)
+The task is two-fold:
 
-### Getting started
-By the end of this guide, you will have a running Flask application which reads data from a Postgres13.5 database.
+* A practical case of developing a deployable production environment based on a simple application.
 
-> Note this guide assumes the reader is working on mac OS and [has homebrew installed](https://docs.brew.sh/Installation).
+* A theoretical case describing a solution to provide secure database access.
 
-#### 1. Install and launch Docker Desktop
+You will be expected to present and discuss both solutions.
 
-```bash
-brew cask install docker
-open -a Docker
-```
+Some general points:
 
-#### 2. Build the container images
+* **Provide the solution as a public git repository that our team can easily clone.**
 
-This command builds two images, one for the database and one for the Flask application.
+* Provide instructions to run the automation solution in `README.md`.
 
-```bash
-docker compose build
-```
+* The configuration file `rates/config.py` has some defaults that will most likely change depending on the solution. It would be beneficial to have a way to more dynamically pass in config values.
 
-#### 3. Deploy locally
+* List and describe the tool(s) used, and why they were chosen for the task.
 
-The containers run in a docker network so that they can communicate with each other via ports. Run docker compose:
+* If you have any questions, please don't hesitate to contact us.
 
-```bash
-docker compose up
-```
+## Practical case: Deployable production environment
 
-You can verify that the pods are running via Docker Desktop or by running:
+### Premise
 
-```bash
-docker ps
-```
+Two simplified parts of the same application environment are provided: A database dump and an API service. Your task is to automate setting up the production environment in a reliable and testable manner using "infrastructure as code" principles.
 
-The output will look something like:
+The goal is to end up with a limited set of commands that would install and run them using containers. You can use any software that you find suitable for the task. The code should come with instructions on how to run and deploy it to AZURE (or any other cloud you are comfortable with).
+
+### Running the database
+
+There’s an SQL dump in `db/rates.sql` that needs to be loaded into a PostgreSQL 13.5 database.
+
+After installing the database, the data can be imported through:
 
 ```
-CONTAINER ID   IMAGE                  COMMAND                  CREATED             STATUS             PORTS                    NAMES
-af77e9c0c99e   silver-adventure-app   "gunicorn -b 0.0.0.0…"   About an hour ago   Up About an hour   0.0.0.0:3000->3000/tcp   silver-adventure-app-1
-ab03aadfca34   postgres:13.5          "docker-entrypoint.s…"   About an hour ago   Up About an hour   0.0.0.0:5432->5432/tcp   silver-adventure-rates_db-1
+createdb rates
+psql -h localhost -U postgres < db/rates.sql
 ```
 
-The API should now be available to test at http://localhost:3000
+You can verify that the database is running through:
 
-Test the application by getting the average rates between ports:
+```
+psql -h localhost -U postgres -c "SELECT 'alive'"
+```
+
+The output should be something like:
+
+```
+ ?column?
+----------
+ alive
+(1 row)
+```
+
+### Running the API service
+
+Start from the `rates` folder.
+
+#### 1. Install prerequisites
+
+```
+DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y python3-pip
+pip install -U gunicorn
+pip install -Ur requirements.txt
+```
+
+#### 2. Run the application
+```
+gunicorn -b :3000 wsgi
+```
+
+The API should now be running on [http://localhost:3000](http://localhost:3000).
+
+#### 3. Test the application
+
+Get average rates between ports:
 ```
 curl "http://127.0.0.1:3000/rates?date_from=2021-01-01&date_to=2021-01-31&orig_code=CNGGZ&dest_code=EETLL"
 ```
@@ -79,86 +108,13 @@ The output should be something like this:
 }
 ```
 
-#### Troubleshooting
-Start by verifying that the data has been correctly loaded into the database by adding pgadmin to the **docker-compose.yaml** under **services**
+## Case: Secure Database Access
 
-```yaml
-services:
-    pgadmin:
-        image: dpage/pgadmin4:latest
-        restart: always
-        environment:
-            PGADMIN_DEFAULT_EMAIL: admin@admin.com
-            PGADMIN_DEFAULT_PASSWORD: pgadmin
-            PGADMIN_LISTEN_PORT: 80
-        ports:
-            - "8080:80"
-        depends_on:
-            - rates_db
-        networks:
-            - dem
-```
+In this section we are seeking high-level answers only (no need to implement anything), and describe your solution appropriately.
 
-You can use the values in the **environment** section to login and query the database.
+We use Azure Database for PostgreSQL to host our PostgreSQL database that powers critical data services within CFP. Due to compliance requirements, we need to enable end-to-end auditing capability for any operation performed in the database. Along with that, we need an automated solution that rotates database user passwords every 30 days. The database being accessed by both CFP internal users and any applications hosted in AZURE.
+Users will be created on request and a data security personal must approve the request.
 
-### Security considerations
+Propose a solution that we can implement to achieve the objectives while having zero downtime for the CFP applications.
 
-An example of some of the security considerations made:
-- Restrict container permissions and installed packages
-- Resolve secrets from environment variables for later injection into the containers by a secrets management tool
-- Fixed image digest and package versions for deterministic build
-
-### With more time
-
-#### Fix issues
-One of the issues I would like to solve is the occasional race condition where the database has not started by the time the API is attempting to make the connection. Proposed solution is to add an entrypoint script to the app Dockerfile which checks that postgres is running before starting.
-
-#### CI/CD Pipeline
-I would like to setup a CI/CD pipeline to
-    - build, test and scan Python application source code (requires writing of unit tests / testcontainers setup)
-    - build, scan and publish the container images to ACR
-    - deploy to pre-existing ACI to test
-
-Zoomed out view of this would be to work on re-using the terraform/azure configuration from the [previous attempt](https://github.com/brendanelmes/silver-adventure/tree/first-attempt-terraform-az) with GitHub Actions to provision all of the required infrastructure in a repeatable way.
-
-#### Testability
-During my testing I used a pgadmin container in the docker compose config. I would like this to be configured as an option that the developer could use only in the local configuration e.g. a flag when running docker compose (maybe wrap commands in a script) which would allow for manual testing and debugging.
-
-#### Other security
-- Add an authentication mechanism
-- Investigate providing the application with reduced priviliges when accessing the db (not admin user)
-
-# 2. Secure Database Access
-
-Summary of solution requirements:
-- Rotates DB user passwords
-- DB access by users and applications
-- Manual approval for new DB users
-- E2E audit capability for DB operations
-- Zero downtime
-
-### Proposed solution:
-
-#### HashiCorp Vault Database Secrets Engine
-Deploying a Vault Production cluster (highly available) to handle the rotation and creation of database users and credentials would ensure zero downtime. Here is an example of how it might be set up:
-
-- Enable the appropriate auth methods to allow users from other cloud platforms and systems to authenticate
-- Enable the Database Secrets Engine and provide Vault with the Postgres root admin password. Vault will automatically rotate the root password based on a specified time period.
-- Create roles such as readonly, readwrite etc. based on the groups of necessary database actions which would be performed by individual users / applications
-- A way of adding manual approval by data security personel is by mapping a 'group' entity from an auth method, to a one of these Vault roles. For example, if using Active Directory, an AD group could be created, and joining the AD group can be manually controlled.
-- Each time an application or user with a valid role requests database credentials, the secrets engine generates and returns them (created on request) with a TTL.
-
-Vault would provide the audit information about who is granted database credentials, but no visibility of what operations are performed. For this audit capability, [pgAudit](https://www.pgaudit.org) could be used, with logging configured to use Azure Monitor Logs for analytics and performance.
-
-#### Diagram
-
-![diagram](images/diagram.png)
-
-1. User requests database credentials from Vault
-2. Vault uses database root credentials to create a temporary database user with role defined by external group
-3. Database returns generated credentials to Vault
-4. Vault returns generated credentials to User
-5. User uses credentials to log in to database and perform operations
-6. Monitor logs collects logs from pgAudit in a Log Analytics Workspace ready for analysis
-
-Note the interaction would be the same for a User or an Application using a service principal.
+Provide a high-level diagram, along with a few paragraphs describing the choices you've made and what factors you need to take into consideration.
